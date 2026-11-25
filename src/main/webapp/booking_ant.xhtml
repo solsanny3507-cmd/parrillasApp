@@ -1,0 +1,443 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data">
+            <p:growl id="messages" showDetail="true" skipDetailIfEqualsSummary="true"/>
+
+            <div class="layout-header-logo">
+                <p:graphicImage
+                        name="images/logo-quito.svg"
+                        library="epmmop-layout"/>
+            </div>
+
+            <p:outputPanel id="panelVista" layout="block"
+                           style="display: #{bookingController.booking ? 'block' : 'none'}"
+                           styleClass="mt-2">
+                <div class="text-center mt-3">
+                    <span class="text-primary-bold-custom text-2xl">Reserva de</span> <span
+                        class="text-secondary-bold-custom text-2xl">Zonas BBQ</span>
+                </div>
+
+                <div class="ui-fluid formgrid grid mt-4">
+                    <div class="field col-12 md:col-12">
+                        <p:outputLabel for="cmbParques" value="Seleccionar Parque" styleClass="title-input"/>
+                        <p:selectOneMenu id="cmbParques" value="#{bookingController.parque}"
+                                         required="true" requiredMessage="Seleccione un parque">
+                            <f:selectItem itemLabel="" itemValue="#{null}"/>
+                            <f:selectItems value="#{bookingController.parquesList}" var="data"
+                                           itemLabel="#{data.parNombre}" itemValue="#{data}"/>
+                            <o:selectItemsConverter/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field col-12 md:col-12">
+                        <p:outputLabel for="calFecha" value="Seleccionar Fecha" styleClass="title-input"/>
+                        <p:datePicker id="calFecha" value="#{bookingController.fechaReserva}" touchUI="true"
+                                      showIcon="true" pattern="yyyy-MM-dd" locale="es"
+                                      styleClass="text-xl" required="true"
+                                      requiredMessage="Seleccione fecha de reserva"
+                                      mindate="#{bookingController.fechaMinima}"
+                                      maxdate="#{bookingController.fechaMaxima}">
+                        </p:datePicker>
+                    </div>
+                    <div class="field col-12 md:col-12 mt-2">
+                        <p:commandButton id="btnBuscar" value="Buscar Parrillas" icon="fa-solid fa-magnifying-glass"
+                                         styleClass="ui-button"
+                                         process="@this cmbParques calFecha"
+                                         update="form:panelDisponibles"
+                                         actionListener="#{bookingController.cargarParrillasDisponibles}"/>
+                    </div>
+                </div>
+
+                <p:outputPanel id="panelDisponibles" layout="block"
+                               style="display: #{bookingController.existeDisponibilidad ? 'block' : 'none'}"
+                               styleClass="mt-3">
+
+                    <p:divider align="center">
+                        <div class="inline-flex align-items-center">
+                            <p class="text-primary-bold-custom text-center text-2xl">Parque #{bookingController.parque.parNombre}</p>
+                        </div>
+                    </p:divider>
+
+                    <p class="text-secondary-bold-custom text-center text-xl">#{bookingController.parrillasDisponiblesList.size()} Parrillas disponibles para #{bookingController.fechaReserva}</p>
+
+                    <ui:repeat value="#{bookingController.parrillasDisponiblesList}" var="p">
+                        <div class="bbq-card">
+                            <!-- Imagen -->
+                            <div class="bbq-card__image-wrapper">
+                                <img class="bbq-card__image"
+                                     src="#{p.asaImagen}"
+                                     alt="Foto de #{p.asaNombre}" />
+                            </div>
+
+                            <!-- Contenido -->
+                            <div class="bbq-card__body">
+                                <div class="bbq-card__title">
+                                    #{p.asaNombre}
+                                </div>
+
+                                <div class="bbq-card__meta">
+                                    <span class="bbq-card__label">Capacidad:</span>
+                                    <span class="bbq-card__value">#{p.asaCapacidad} personas</span>
+                                </div>
+
+                                <div class="bbq-card__meta">
+                                    <span class="bbq-card__label">Grupo:</span>
+                                    <span class="bbq-card__value">#{p.grupoParrilla.graNombre}</span>
+                                </div>
+
+                                <p:commandButton value="Ver detalles"
+                                                 actionListener="#{bookingController.verDetalle(p)}"
+                                                 icon="pi pi-arrow-right"
+                                                 iconPos="left"
+                                                 process="@this"
+                                                 update="form:panelVista form:panelDetalle"
+                                                  />
+                            </div>
+                        </div>
+                    </ui:repeat>
+                </p:outputPanel>
+            </p:outputPanel>
+
+            <p:outputPanel id="panelDetalle" layout="block"
+                           style="display: #{!bookingController.booking ? 'block' : 'none'}">
+                <p:commandButton value="Regresar"
+                                 action="#{bookingController.regresarBooking}"
+                                 icon="fa-solid fa-angle-left"
+                                 styleClass="ui-button-info mr-2 mt-3"
+                                 update="form" immediate="true"/>
+
+                <p:galleria widgetVar="galleria2" value="#{bookingController.parrilla}" var="photo"
+                            circular="true" fullScreen="true" showThumbnails="false" style="max-width: 850px">
+                    <img alt="Foto Parrilla" class="mt-3 border-round-3xl" width="95%"
+                         src="#{bookingController.parrilla.asaImagen}"/>
+                </p:galleria>
+
+                <p:commandButton value="Ver Foto" icon="pi pi-image" onclick="PF('galleria2').show()"
+                                 styleClass="ui-button-help" immediate="true"/>
+
+                <h4 class="text-primary-bold-custom text-center">Datos de Reserva</h4>
+
+                <p:panelGrid columns="2" layout="tabular" styleClass="w-full mb-3">
+                    <h:outputText styleClass="text-primary-bold-custom" value="Parque:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="Parque #{bookingController.parrilla.grupoParrilla.parque.parNombre}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="Parrilla:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="#{bookingController.parrilla.asaNombre}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="Grupo:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="#{bookingController.parrilla.grupoParrilla.graNombre}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="Capacidad:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="#{bookingController.parrilla.asaCapacidad} personas"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="Fecha de reserva:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="#{bookingController.fechaReserva}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="Subtotal:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="$#{bookingController.baseImponible}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom" value="IVA:"/>
+                    <h:outputText styleClass="text-secondary-light-custom text-xl"
+                                  value="$#{bookingController.valorIVA}"/>
+
+                    <h:outputText styleClass="text-primary-bold-custom text-2xl" value="Total a pagar:"/>
+                    <h:outputText styleClass="text-secondary-bold-custom text-2xl"
+                                  value="$#{bookingController.precioTotal}"/>
+                </p:panelGrid>
+
+                <div class="ui-fluid formgrid grid md:mb-4">
+                    <div class="field col-12 md:col-12 lg:col-12">
+                        <div class="ui-inputgroup">
+                            <p:inputText id="txtIdentificacion"
+                                         value="#{bookingController.identificacion}"
+                                         maxlength="10" placeholder="Cédula" required="true"
+                                         requiredMessage="Ingrese su cédula"
+                                         onkeypress="{return event.charCode &gt;= 48 &amp;&amp; event.charCode &lt;= 57}"
+                                         onpaste="return false"
+                                         ondrop="return false"
+                                         oncontextmenu="return false"
+                                         onkeydown="if (event.ctrlKey &amp;&amp; (event.key === 'v' || event.key === 'V')) return false;"/>
+                            <p:commandButton value="Validar" actionListener="#{bookingController.verificarCliente}"
+                                             process="@this txtIdentificacion"
+                                             update="txtNombre txtCorreo txtTelefono"/>
+                        </div>
+                    </div>
+                    <div class="field col-12 md:col-12 lg:col-12">
+                        <span class="ui-input-icon-left">
+                        <i class="pi pi-user"></i>
+                        <p:inputText id="txtNombre" value="#{bookingController.ciudadano.ciuNombre}"
+                                     maxlength="30" placeholder="Nombres" readonly="true"/>
+                        </span>
+                    </div>
+                    <div class="field col-12 md:col-12 lg:col-6">
+                        <span class="ui-input-icon-left">
+                        <i class="pi pi-envelope"> </i>
+                        <p:inputText id="txtCorreo" value="#{bookingController.ciudadano.ciuCorreo}"
+                                     maxlength="80" placeholder="Correo" required="true"
+                                     requiredMessage="Ingrese el correo" styleClass="lowercase"/>
+                        </span>
+                    </div>
+                    <div class="field col-12 md:col-12 lg:col-6">
+                        <span class="ui-input-icon-left">
+                        <i class="pi pi-phone"></i>
+                        <p:inputText id="txtTelefono" value="#{bookingController.ciudadano.ciuTelefono}"
+                                     maxlength="10" placeholder="Teléfono" required="true"
+                                     requiredMessage="Ingrese un número de teléfono"
+                                     onkeypress="{return event.charCode &gt;= 48 &amp;&amp; event.charCode &lt;= 57}"
+                                     onpaste="return false"
+                                     ondrop="return false"
+                                     oncontextmenu="return false"
+                                     onkeydown="if (event.ctrlKey &amp;&amp; (event.key === 'v' || event.key === 'V')) return false;"/>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <div class="mt-2">
+                        <p:commandLink value="Leer Politicas de Uso y Reserva" immediate="true"
+                                       onclick="PF('dlg1').show()"/>
+                    </div>
+                    <div class="mt-2">
+                        <p:commandLink value="Leer Términos y Condiciones" immediate="true"
+                                       onclick="PF('dlg2').show()"/>
+                    </div>
+                    <div class="mt-2 mb-2">
+                        <p:commandLink value="Leer Políticas de Protección de Datos" immediate="true"
+                                       onclick="PF('dlg3').show()"/>
+                    </div>
+                </div>
+
+                <div class="ui-fluid formgrid grid md:text-center mt-3">
+                    <div class="field col-12 md:col-12">
+                        <p:selectBooleanCheckbox id="chkTerminos" value="#{bookingController.aceptaTerminos}"
+                                                 itemLabel="Si acepto los términos y condiciones" styleClass="mt-2">
+                            <p:ajax listener="#{bookingController.verificarAceptacion}" update="form:btnPagar"/>
+                        </p:selectBooleanCheckbox>
+                    </div>
+                    <div class="field col-12 md:col-12">
+                        <p:selectBooleanCheckbox id="chkPoliticas" value="#{bookingController.aceptaPoliticas}"
+                                                 itemLabel="Si acepto las políticas de protección de datos"
+                                                 styleClass="mt-2 mb-2">
+                            <p:ajax listener="#{bookingController.verificarAceptacion}" update="form:btnPagar"/>
+                        </p:selectBooleanCheckbox>
+                    </div>
+                </div>
+
+                <div class="logos-pago">
+                    <img src="https://static.placetopay.com/placetopay-logo.svg" alt="Logo Placetopay"/>
+                    <img src="franquicias.png" alt="Franquicias"/>
+                </div>
+
+                <div class="ui-fluid formgrid grid mt-4">
+                    <div class="field col-12">
+                        <p:commandButton id="btnPagar" value="Pagar" icon="fa-regular fa-credit-card"
+                                         styleClass="ui-button"
+                                         process="@this txtIdentificacion txtNombre txtCorreo txtTelefono"
+                                         update="messages"
+                                         disabled="#{bookingController.habilitarPago}"
+                                         actionListener="#{bookingController.validarPrevioPago}"/>
+                    </div>
+                </div>
+
+                <p:dialog header="Políticas de Uso y Reserva" widgetVar="dlg1" minHeight="500"
+                          height="500"
+                          showEffect="fade"
+                          closeOnEscape="true" modal="true" blockScroll="true" fitViewport="true">
+                    <div style="max-height:600px; overflow-y:auto; padding-right:10px;margin-top: 20px">
+                        <h2>1. POLÍTICAS DE USO</h2>
+                        <p>El uso de la parrilla es exclusivo para quienes realicen la reserva.</p>
+                        <p>Respetar la capacidad máxima.</p>
+                        <p>Horario de uso: 09h00 a 17h00 (estricto).</p>
+                        <p>Mantener limpio el lugar y no dejar basura.</p>
+                        <p>Las mascotas deben permanecer con correa y sus dueños portar funda para recoger desechos.</p>
+                        <p>Prohibido ingerir bebidas alcohólicas.</p>
+                        <p>No dañar las instalaciones.</p>
+                        <p>No agredir flora ni fauna nativa.</p>
+                        <p>Apagar con agua el carbón al finalizar y dejar el asadero limpio, tal como lo recibió.</p>
+                        <p>Usar únicamente el asadero asignado en la reserva.</p>
+                        <p>No utilizar confeti y retirar cualquier adorno colocado.</p>
+                        <p>Prohibido el uso de estructuras adicionales como carpas, cañones de espuma, inflables o estructuras comerciales/publicitarias.</p>
+
+                        <h2>2. POLÍTICAS DE RESERVA</h2>
+                        <p>El uso de las parrillas tiene un costo, que deberá pagarse en línea y presentarse en la administración previo al ingreso.</p>
+                        <p>En caso de no poder asistir, el usuario deberá cancelar su reserva desde la aplicación. No se aceptan cambios ni devoluciones.</p>
+                        <p>La fecha de reserva podrá modificarse únicamente en caso de emergencia (dentro del plan Fuego).</p>
+                        <p>La persona que realiza la reserva es responsable de organizar a sus invitados y comunicarles el reglamento de uso.</p>
+                    </div>
+                </p:dialog>
+
+                <p:dialog header="Términos y Condiciones" widgetVar="dlg2" minHeight="500" height="500"
+                          showEffect="fade"
+                          closeOnEscape="true" modal="true" blockScroll="true" fitViewport="true">
+                    <div style="max-height:600px; overflow-y:auto; padding-right:10px;margin-top: 20px">
+                        <p>
+                            Estos Términos y Condiciones de Uso de la Aplicación de Quito a tu Alcance (de aquí en adelante “Términos de
+                            Uso”), tendrán vigencia a partir de la fecha de aceptación electrónica por parte del usuario quien reconoce y
+                            declara estar facultado para celebrar todo tipo de acto jurídico respecto del servicio que la Empresa Pública
+                            Metropolitana de Movilidad y Obras Públicas EPMMOP pone a su disposición; en tal virtud, garantiza la veracidad,
+                            exactitud e integridad de la información proporcionada dentro de la aplicación.
+                        </p>
+                        <p>
+                            El usuario y contraseña provisto para cada cliente, debe mantenerse en todo momento bajo su confidencialidad y
+                            seguridad, ya que, a través de este, se autentica su acceso vinculando unívocamente, el acceso en mención con su
+                            titular, así como las transacciones realizadas en la aplicación, como expresión libre de su voluntad. La EPMMOP no
+                            es responsable por la revelación, pérdida o sustracción relacionadas con el uso no autorizado de los mismos.
+                            Al hacer clic en “Aceptar”, el Usuario declara haber leído, entendido y aceptado con plena voluntad el presente
+                            instrumento en todas sus partes; por lo cual, garantiza que la información y datos registrados durante el proceso
+                            son verídicos y lícitos, eximiendo de responsabilidad a la EPMMOP sobre la misma.
+                        </p>
+
+                        <h2>1. SERVICIO</h2>
+                        <p>
+                            El Usuario autoriza expresamente a la EPMMOP a recabar información respecto al uso y comportamiento de uso de la
+                            aplicación, con el fin de analizar las tendencias, así como para garantizar, operar y mejorar los productos y
+                            servicios que presta la EPMMOP. Adicionalmente, utilizará cualquier información que se le proporcione con relación
+                            al uso que el Usuario le dé a la Aplicación Quito a tu Alcance (sin reconocimiento o remuneración alguna) con el
+                            fin de medir la calidad de servicio y como parte de un proceso de mejora continua.
+                        </p>
+                        <p>
+                            El Usuario, creará una cuenta o perfil que lo identificará en todos los procesos que se realicen a través del
+                            aplicativo, pudiendo incorporar la información del nombre, dirección domiciliaria, teléfono celular, dirección de
+                            correo electrónico o cualquier otro identificativo que a futuro se implemente.
+                        </p>
+                        <p>
+                            Con el fin de evitar cualquier transacción fraudulenta, la EPMMOP se reserva el derecho de bloquear de manera
+                            temporal o definitiva el perfil, del usuario cuando por cualquier motivo se detecte un comportamiento inusual en
+                            el uso del aplicativo, esto puede incluir más no limitarse a varios accesos no autorizados o fallidos.
+                        </p>
+                        <p>
+                            El procedimiento de descarga de aplicativo para los usuarios, el cual se encuentra sujeto a variaciones de acuerdo
+                            con las actualizaciones o modificaciones que cada sistema operativo disponga será a través de Google Play o Apple
+                            Store, mediante buscador o de forma directa.
+                        </p>
+                        <p>
+                            En todos los casos de descarga, se deberá otorgar los permisos necesarios que demande el aplicativo, sin que por
+                            ello exista violación de confidencial de la información contenida en el dispositivo móvil y/o terminal. Una vez
+                            instalado el aplicativo recopilará, de manera automática, la información específica del dispositivo móvil y/o
+                            terminal desde la que se accede al servicio, pudiendo comprender: modelo y versión de sistema operativo; hardware,
+                            software; identificador de dispositivo único e información de la red que utiliza, activación de notificaciones;
+                            activación del sistema de posicionamiento global (gps), entre otros.
+                        </p>
+                        <p>
+                            El aplicativo obtiene y almacena automáticamente determinada información los cuales pueden incluir: información
+                            detallada sobre la forma y medio de uso del servicio; información relativa al dispositivo móvil y/o terminal,
+                            respecto a fallos, actividad del sistema; ajustes, tipo de navegador, idioma; fecha, hora; y latitud y longitud de
+                            las transacciones realizadas a través del aplicativo, las cuales se sujetan a la debida confidencialidad.
+                        </p>
+
+                        <h2>2. MEDIOS DE PAGO</h2>
+                        <p>
+                            El Usuario declara y acepta, con el registro de una tarjeta de crédito o débito en la aplicación, que es dueño de
+                            la tarjeta, tarjetahabiente adicional o, que de ser el caso, cuenta con la autorización del titular de la tarjeta
+                            para registrarla.
+                        </p>
+                        <p>
+                            El Usuario declara y acepta, con el registro de cualquier otro medio de pago en la aplicación, que es dueño es
+                            dueño del medio de pago, que de ser el caso, cuenta con la autorización del titular del mismo.
+                        </p>
+                        <p>
+                            El usuario reconoce que, cualquier cargo que realice a una tarjeta o medio de pago registrado en el aplicativo por
+                            parte de cualquier ciudadano que se identifique como usuario, solo podrá realizarse exclusivamente bajo el
+                            consentimiento de éste último, y se responsabiliza expresamente con el Banco y/o Cooperativa por cualquier consumo
+                            que realice mediante el aplicativo.
+                        </p>
+                        <p>
+                            Cuando el usuario envía un pago al aplicativo, este podrá ser rechazado automáticamente por la no disponibilidad
+                            de cupo suficiente en la tarjeta o medio de pago para la transacción requerida, o por un mal registro de la
+                            información de la tarjeta/medio de pago en el aplicativo, o por falta o poca capacidad de señal de internet, que
+                            permita el correcto acceso al servicio.
+                        </p>
+                        <p>
+                            El usuario se compromete a no rechazar el uso y consecuente procesamiento de pagos que fuera realizado mediante el
+                            aplicativo, así como la TARJETA que hubiera sido registrada por el usuario en su momento.
+                        </p>
+
+                        <h2>3. PRIVACIDAD Y TRATAMIENTO DE DATOS DE CARÁCTER PERSONAL</h2>
+                        <p>
+                            Toda información registrada con fines de uso y acceso a los productos y servicios a través del aplicativo, está
+                            sujeta a privacidad, conforme lo señala la normativa legal vigente aplicable. Sin embargo, el usuario es
+                            responsable de la custodia de claves, contraseñas, usuarios, así como de contar con las seguridades al hardware
+                            que soporta el canal a través del cual accede.
+                        </p>
+                        <p>
+                            La EPMMOP podrá tratar los datos de carácter personal del usuario, incluidos los patrones de seguridad antes
+                            descritos, con las siguientes finalidades: (i) identificar al usuario en esta aplicación; (ii) validar y
+                            verificar sus datos cuando el Cliente acceda desde otras aplicaciones, dispositivos móviles o canales digitales;
+                            (iii) dar cumplimiento al objeto de la Aplicación; (iv) aplicar las medidas necesarias para el cumplimiento de
+                            lo establecido en las normas legales vigentes para prevenir, detectar y erradicar el delito de lavado de activos
+                            y financiamiento de delitos incluido el terrorismo, así como informar a las Autoridades Competentes incluyendo
+                            aquellas que por las leyes o reglamentariamente facultadas requiera información de tipo crediticio u otro
+                            aplicable; (v) realizar análisis estadísticos (analítica) sobre el uso de esta aplicación y/o de servicios
+                            prestados por la EPMMOP y que comprenden todo tipo de canales, medios de comunicación electrónica, a través de
+                            redes telemáticas, con el propósito de ampliar los servicios; (vi) aplicar seguridad en el uso de canales o
+                            aplicaciones.
+                        </p>
+                        <p>
+                            Tratamiento de datos de terceros: Los datos personales de terceros que se reciba del usuario para el acceso y
+                            uso de su aplicación, serán tratados única y exclusivamente con dichos fines, y no se comunicarán a terceros,
+                            salvo en los casos en que la naturaleza del servicio implique necesariamente dicha comunicación, o por
+                            disposición de Autoridad legalmente facultada a requerirla, la cual se limitará a la finalidad expresada.
+                        </p>
+                        <p>Por tanto, y mediante el presente Acuerdo, el usuario acepta y declara en forma expresa:</p>
+                        <p>(1) Que, toda la información proporcionada es verdadera y precisa;</p>
+                        <p>(2) Que, se ha informado en forma previa, ha leído y aceptado las condiciones, incluyendo las tarifas y
+                            comisiones que aplican. Cualquier modificación será notificada en forma electrónica con anticipación y su
+                            utilización implicará aceptación por parte del usuario.</p>
+                    </div>
+                </p:dialog>
+
+                <p:dialog header="Políticas de Privacidad y Protección de Datos" widgetVar="dlg3" minHeight="500"
+                          height="500"
+                          showEffect="fade"
+                          closeOnEscape="true" modal="true" blockScroll="true" fitViewport="true">
+                    <div style="max-height:600px; overflow-y:auto; padding-right:10px;margin-top: 20px">
+                        <p>El titular de los datos acepta y emite su consentimiento unilateral de manera libre y voluntaria para el
+                            tratamiento
+                            de sus datos personales para que sean: recolectados a través de nuestros canales electrónicos o por cualquier
+                            medio,
+                            almacenados, procesados, transmitidos y eliminados o para ser objeto de cualquier tratamiento o conjunto de
+                            tratamientos a realizar, ya sea por procedimientos técnicos de carácter automatizado, parcialmente automatizado o
+                            no
+                            automatizados por el Comercio o su delegado, con la finalidad de identificar, actualizar sus datos y ofrecerle
+                            servicios y/o productos a través de los canales digitales o cualquier otro medio.</p>
+
+                        <p>La transmisión y almacenamiento de la información recopilada por el Comercio o su delegado, será realizada en la
+                            infraestructura que este administre, dentro o fuera del territorio ecuatoriano. Esta infraestructura puede ser
+                            implementada en servidores físicos o en la nube de proveedores que cuenten con las debidas certificaciones
+                            internacionales para el tratamiento de Seguridad de la Información.</p>
+
+                        <p>Adicionalmente, mediante la presente el titular de los datos declara conocer y aceptar el Aviso de Política de
+                            Privacidad de Placetopay en la cual se indican sus derechos, datos tratados y las actividades comerciales de los
+                            aliados, así como otros datos de interés respecto a la protección de datos personales, que se encuentran
+                            detallados en
+                            el sitio web de Placetopay en la ruta https://www.placetopay.com/web/politicas-de-privacidad/, mediante la
+                            cual,
+                            se
+                            podrá solicitar la gestión de derechos o consentimientos.</p>
+
+                        <p>El Comercio o su delegado notificará sobre las actualizaciones del Aviso de Política de Privacidad antes
+                            mencionado
+                            por
+                            medio de los diferentes canales digitales.</p>
+                    </div>
+                </p:dialog>
+            </p:outputPanel>
+
+        </h:form>
+
+
+        <script type="text/javascript" src="#{request.contextPath}/resources/epmmop-layout/js/alert.js"></script>
+    </ui:define>
+</ui:composition>

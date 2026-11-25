@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="jakarta.faces.html"
+        xmlns:f="jakarta.faces.core"
+        xmlns:ui="jakarta.faces.facelets"
+        xmlns:p="http://primefaces.org/ui"
+        template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+
+        <h:form id="form">
+
+            <p:growl id="messages"
+                     showDetail="true"
+                     skipDetailIfEqualsSummary="true"/>
+
+
+            <!-- ================================================= -->
+            <!-- POLLING DEL POSTPROCESO                            -->
+            <!-- ================================================= -->
+
+            <!--
+                Solo se utiliza cuando el pago está aprobado.
+
+                NO vuelve a consultar PlaceToPay.
+                NO vuelve a procesar el pago.
+
+                Únicamente comprueba PostgreSQL hasta encontrar
+                el QR generado por PostPagoService.
+            -->
+            <p:poll interval="2"
+                    process="@this"
+                    listener="#{statusController.refrescarEstadoReserva}"
+                    update="panelReserva"
+                    rendered="#{statusController.pagoExitoso}"
+                    stop="#{statusController.postPagoFinalizado}"/>
+
+
+            <!-- ================================================= -->
+            <!-- LOGO                                               -->
+            <!-- ================================================= -->
+
+            <div class="layout-header-logo">
+
+                <p:graphicImage
+                        name="images/logo-quito.svg"
+                        library="epmmop-layout"/>
+
+            </div>
+
+
+            <div class="status-page-container mt-5">
+
+
+                <!-- ================================================= -->
+                <!-- RESULTADO PRINCIPAL                                -->
+                <!-- ================================================= -->
+
+                <div class="status-summary-card">
+
+                    <div class="status-header">
+
+                        <div class="status-icon-box">
+
+                            <p:graphicImage
+                                    name="images/approved.png"
+                                    library="epmmop-layout"
+                                    rendered="#{statusController.pagoExitoso}"
+                                    styleClass="status-icon"/>
+
+                            <p:graphicImage
+                                    name="images/rejected.png"
+                                    library="epmmop-layout"
+                                    rendered="#{statusController.pagoRechazado}"
+                                    styleClass="status-icon"/>
+
+                            <p:graphicImage
+                                    name="images/pending.png"
+                                    library="epmmop-layout"
+                                    rendered="#{statusController.pagoPendiente}"
+                                    styleClass="status-icon"/>
+
+                        </div>
+
+
+                        <div class="status-title-box">
+
+                            <h2 class="status-title text-primary-bold-custom">
+
+                                #{statusController.tituloResultado}
+
+                            </h2>
+
+                            <p class="status-subtitle text-secondary-light-custom">
+
+                                #{statusController.subtituloResultado}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- DATOS REQUERIDOS DE LA TRANSACCIÓN                 -->
+                    <!-- ================================================= -->
+
+                    <div class="status-info-grid">
+
+
+                        <!-- ESTADO -->
+
+                        <div class="info-item">
+
+                            <span class="info-label">
+                                Estado
+                            </span>
+
+                            <span class="info-value">
+                                #{statusController.status}
+                            </span>
+
+                        </div>
+
+
+                        <!-- TOTAL -->
+
+                        <div class="info-item">
+
+                            <span class="info-label">
+                                Total
+                            </span>
+
+                            <span class="info-value">
+
+                                <h:outputText
+                                        value="#{statusController.transaccion.trxMonto}">
+
+                                    <f:convertNumber
+                                            type="currency"
+                                            currencySymbol="$"
+                                            minFractionDigits="2"
+                                            maxFractionDigits="2"/>
+
+                                </h:outputText>
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- MONEDA -->
+
+                        <div class="info-item">
+
+                            <span class="info-label">
+                                Moneda
+                            </span>
+
+                            <span class="info-value">
+                                Dólares (USD)
+                            </span>
+
+                        </div>
+
+
+                        <!-- REFERENCIA -->
+
+                        <div class="info-item">
+
+                            <span class="info-label">
+                                Referencia
+                            </span>
+
+                            <span class="info-value">
+                                #{statusController.transaccion.trxReferencia}
+                            </span>
+
+                        </div>
+
+
+                        <!-- FECHA DE TRANSACCIÓN -->
+
+                        <div class="info-item info-item-full">
+
+                            <span class="info-label">
+                                Fecha de transacción
+                            </span>
+
+                            <span class="info-value">
+                                #{statusController.pagoResponseDTO.date}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ================================================= -->
+                <!-- INFORMACIÓN DE RESERVA                             -->
+                <!-- ================================================= -->
+
+                <p:outputPanel
+                        id="panelReserva"
+                        layout="block">
+
+
+                    <!-- ================================================= -->
+                    <!-- SOLO CUANDO EL PAGO FUE APROBADO                   -->
+                    <!-- ================================================= -->
+
+                    <p:outputPanel
+                            rendered="#{statusController.pagoExitoso}"
+                            layout="block"
+                            styleClass="success-details-card mt-3">
+
+
+                        <h2 class="status-title
+                                   text-primary-bold-custom
+                                   text-center">
+
+                            Información de la reserva
+
+                        </h2>
+
+
+                        <!-- ================================================= -->
+                        <!-- QR DISPONIBLE                                      -->
+                        <!-- ================================================= -->
+
+                        <p:outputPanel
+                                rendered="#{statusController.qrDisponible}">
+
+                            <div class="success-message-box">
+
+                                <p class="success-message">
+
+                                    Tu reserva se encuentra activa.
+                                    Presenta el siguiente código QR
+                                    al personal administrativo del parque
+                                    al momento de tu ingreso.
+
+                                </p>
+
+                            </div>
+
+
+                            <div class="qr-section">
+
+                                <div class="qr-image-box">
+
+                                    <p:graphicImage
+                                            value="#{statusController.qrImage}"
+                                            stream="false"
+                                            styleClass="qr-image"/>
+
+                                </div>
+
+
+                                <div class="qr-status-badge mt-3">
+
+                                    RESERVA ACTIVA
+
+                                </div>
+
+                            </div>
+
+                        </p:outputPanel>
+
+
+                        <!-- ================================================= -->
+                        <!-- QR EN PROCESO                                      -->
+                        <!-- ================================================= -->
+
+                        <p:outputPanel
+                                rendered="#{!statusController.qrDisponible}">
+
+                            <div class="success-message-box">
+
+                                <p class="success-message">
+
+                                    Tu pago fue confirmado correctamente
+                                    y la parrilla ya se encuentra reservada.
+
+                                </p>
+
+                                <p class="success-message">
+
+                                    Estamos generando el código QR
+                                    de tu reserva. Aparecerá automáticamente
+                                    en unos segundos.
+
+                                </p>
+
+                            </div>
+
+                        </p:outputPanel>
+
+
+                        <!-- ================================================= -->
+                        <!-- ESTADO DEL CORREO                                  -->
+                        <!-- ================================================= -->
+
+
+                        <!-- CORREO ENVIADO -->
+
+                        <p:outputPanel
+                                rendered="#{statusController.correoEnviado}">
+
+                            <div class="success-message-box mt-3">
+
+                                <p class="success-message">
+
+                                    Hemos enviado los datos de tu reserva
+                                    y el código QR al correo:
+
+                                    <strong>
+                                        #{statusController.transaccion.ciudadano.ciuCorreo}
+                                    </strong>
+
+                                </p>
+
+                                <p class="success-message">
+
+                                    Revisa también la carpeta de correo
+                                    no deseado o spam.
+
+                                </p>
+
+                            </div>
+
+                        </p:outputPanel>
+
+
+                        <!-- CORREO PENDIENTE -->
+
+                        <p:outputPanel
+                                rendered="#{statusController.correoPendiente}">
+
+                            <div class="success-message-box mt-3">
+
+                                <p class="success-message">
+
+                                    La confirmación de tu reserva
+                                    y el código QR serán enviados al correo:
+
+                                    <strong>
+                                        #{statusController.transaccion.ciudadano.ciuCorreo}
+                                    </strong>
+
+                                </p>
+
+                            </div>
+
+                        </p:outputPanel>
+
+
+                        <!-- ERROR DE CORREO -->
+
+                        <p:outputPanel
+                                rendered="#{statusController.correoError}">
+
+                            <div class="success-message-box mt-3">
+
+                                <p class="success-message">
+
+                                    Tu reserva está confirmada correctamente.
+
+                                </p>
+
+                                <p class="success-message">
+
+                                    No fue posible enviar el correo
+                                    de confirmación en este momento.
+
+                                    <strong>
+                                        Esto no afecta tu reserva.
+                                    </strong>
+
+                                </p>
+
+                                <p class="success-message"
+                                   rendered="#{statusController.qrDisponible}">
+
+                                    Puedes utilizar el código QR mostrado
+                                    en esta pantalla para el ingreso.
+
+                                </p>
+
+                            </div>
+
+                        </p:outputPanel>
+
+
+                        <!-- ================================================= -->
+                        <!-- DATOS DE LA RESERVA                                -->
+                        <!-- ================================================= -->
+
+                        <div class="reservation-info-card">
+
+
+                            <!-- PARQUE -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Parque:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .reservaParrilla
+                                            .parrilla
+                                            .grupoParrilla
+                                            .parque
+                                            .parNombre}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- GRUPO -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Grupo:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .reservaParrilla
+                                            .parrilla
+                                            .grupoParrilla
+                                            .graNombre}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- PARRILLA -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Parrilla:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .reservaParrilla
+                                            .parrilla
+                                            .asaNombre}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- FECHA RESERVA -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Fecha de reserva:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .reservaParrilla
+                                            .repFechaReserva}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- TITULAR -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Titular:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .ciudadano
+                                            .ciuNombre}
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- CORREO -->
+
+                            <div class="reservation-info-row">
+
+                                <span class="reservation-label">
+                                    Correo:
+                                </span>
+
+                                <span class="reservation-value">
+
+                                    #{statusController.transaccion
+                                            .ciudadano
+                                            .ciuCorreo}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </p:outputPanel>
+
+                </p:outputPanel>
+
+
+                <!-- ================================================= -->
+                <!-- BOTÓN FINALIZAR                                   -->
+                <!-- ================================================= -->
+
+                <div class="action-section">
+
+                    <div class="ui-fluid formgrid grid mt-4">
+
+                        <div class="field col-12">
+
+                            <p:commandButton
+                                    value="Finalizar"
+                                    action="#{statusController.finalizarPago}"/>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </h:form>
+
+
+        <script type="text/javascript"
+                src="#{request.contextPath}/resources/epmmop-layout/js/alert.js">
+        </script>
+
+    </ui:define>
+
+</ui:composition>

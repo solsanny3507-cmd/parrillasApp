@@ -1,0 +1,106 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data">
+            <p:growl id="messages" showDetail="true" skipDetailIfEqualsSummary="true"/>
+
+            <div class="layout-header-logo">
+                <p:graphicImage
+                        name="images/logo-quito.svg"
+                        library="epmmop-layout"/>
+            </div>
+
+            <h4 class="text-primary-bold-custom">Historial de pagos</h4>
+
+            <p:outputPanel id="panelIdentificacion" layout="block"
+                           style="display: #{historyController.verificarCliente ? 'block' : 'none'}"
+                           styleClass="mt-2">
+                <div class="ui-fluid formgrid grid mt-4">
+                    <div class="field col-12 md:col-12">
+                        <p:outputLabel for="txtIdentificacion" value="Ingresar Identificación"
+                                       styleClass="title-input"/>
+                        <div class="ui-inputgroup">
+                            <p:inputText id="txtIdentificacion" value="#{historyController.identificacion}"/>
+                            <p:commandButton value="Buscar" actionListener="#{historyController.consultarPersona}"
+                                             process="@this txtIdentificacion"
+                                             update="form:panelIdentificacion form:panelToken"/>
+                        </div>
+                    </div>
+                </div>
+            </p:outputPanel>
+
+            <p:outputPanel id="panelToken" layout="block"
+                           style="display: #{historyController.existeCliente ? 'block' : 'none'}"
+                           styleClass="mt-2">
+                <div class="ui-fluid formgrid grid mt-4">
+                    <div class="field col-12 md:col-12">
+                        <p:outputLabel for="txtToken" value="Por favor ingrese el token enviado a su correo"
+                                       styleClass="title-input"/>
+                        <div class="ui-inputgroup">
+                            <p:inputText id="txtToken" value="#{historyController.token}"/>
+                            <p:commandButton value="Validar Token"
+                                             actionListener="#{historyController.validarToken}"
+                                             process="@this txtToken" update="form:panelHistorial form:panelToken"/>
+                        </div>
+                    </div>
+
+                    <div class="field col-12 md:col-12">
+                        <p:commandButton value="Nueva Consulta"
+                                         actionListener="#{historyController.nuevaConsulta}"
+                                         process="@this" styleClass="ui-button-help" update="form"/>
+                    </div>
+                </div>
+            </p:outputPanel>
+
+            <p:outputPanel id="panelHistorial" layout="block"
+                           style="display: #{historyController.existenReservas ? 'block' : 'none'}"
+                           styleClass="mt-2">
+
+                <div class="field col-12 md:col-12">
+                    <div class="ui-fluid formgrid grid mt-4">
+                        <p:commandButton value="Nueva Consulta"
+                                         actionListener="#{historyController.nuevaConsulta}"
+                                         process="@this" styleClass="ui-button-help" update="form"/>
+                    </div>
+                </div>
+
+                <div class="mt-4 mb-4">
+                    <p class="text-primary-light-custom text-xl"><strong>Identificación: </strong>#{historyController.ciudadano.ciuIdentificacion}</p>
+                    <p class="text-primary-light-custom text-xl"><strong>Cliente: </strong>#{historyController.ciudadano.ciuNombre}</p>
+                </div>
+
+                <ui:repeat value="#{historyController.transaccionesList}" var="p">
+                    <div class="card-parrilla">
+
+                        <!-- Contenido -->
+                        <div class="card-content">
+                            <span class="text-primary-bold-custom text-xl">#{p.trxEstadoTransaccion} - #{p.trxFechaRespuesta.toLocalDate()} #{p.trxFechaRespuesta.toLocalTime()}</span>
+                            <p class="text-primary-light-custom">Detalle:
+                                <strong>#{p.trxDetalle}</strong>
+                            </p>
+                            <p class="text-primary-light-custom">Total:
+                                <strong>$#{p.trxMonto}</strong>
+                            </p>
+                            <p class="text-primary-light-custom">Referencia:
+                                <strong>#{p.trxReferencia}</strong>
+                            </p>
+                            <p class="text-primary-light-custom">Autorización:
+                                <strong>#{p.trxAutorizacion}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </ui:repeat>
+            </p:outputPanel>
+
+        </h:form>
+
+
+        <script type="text/javascript" src="#{request.contextPath}/resources/epmmop-layout/js/alert.js"></script>
+    </ui:define>
+</ui:composition>

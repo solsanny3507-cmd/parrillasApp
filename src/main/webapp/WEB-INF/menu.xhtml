@@ -1,0 +1,29 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" 
+                xmlns:h="http://java.sun.com/jsf/html" 
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets" 
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:fr="http://primefaces.org/freya">
+
+<div class="menu-wrapper">
+    <div class="sidebar-logo">
+        <a href="booking.xhtml">
+            <p:graphicImage name="images/logo-quito.svg" library="freya-layout" />
+        </a>
+        <a href="#" class="sidebar-pin" title="Toggle Menu">
+            <span class="pin"></span>
+        </a>
+       
+    </div>
+    <div class="layout-menu-container">
+        <h:form id="menuform">
+            <fr:menu widgetVar="FreyaMenuWidget">
+                <p:menuitem id="m_booking" value="Reservas" icon="pi pi-credit-card" outcome="booking" />
+                <p:menuitem id="m_history" value="Historial de pagos" icon="pi pi-list" outcome="history" />
+                <p:menuitem id="m_faqs" value="Preguntas Frecuentes" icon="pi pi-question-circle" outcome="faqs" />
+            </fr:menu>
+        </h:form>
+    </div>
+</div>
+
+</ui:composition>

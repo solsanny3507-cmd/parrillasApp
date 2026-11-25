@@ -1,0 +1,120 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/template.xhtml">
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data">
+
+            <div class="layout-header-logo">
+                <p:graphicImage
+                        name="images/#{ guestPreferences.lightLogo ? 'logo-quito-dark.svg' : 'logo-quito.svg'}"
+                        library="epmmop-layout"/>
+            </div>
+
+            <div class="faq-container mt-4">
+
+                <h4 class="text-primary-bold-custom">Preguntas Frecuentes - Reserva de Parrillas</h4>
+                <p class="text-secondary-light-custom">Encuentra aquí respuestas rápidas sobre reservas, pagos y uso del sistema.</p>
+
+                <p:accordionPanel multiple="true" styleClass="faq-accordion">
+
+                    <p:tab title="¿Cómo puedo reservar una parrilla?">
+                        <p>Las reservas se realizan exclusivamente a través de la aplicación <b>Mi Quito</b>, disponible para Android e iOS.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Qué métodos de pago están disponibles?">
+                        <p>El pago se realiza únicamente con tarjetas de crédito o débito a través de la plataforma Placetopay.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo reservar más de una parrilla en una sola transacción?">
+                        <p>No. Solo se permite una reserva de parrilla por cada transacción realizada.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo cambiar la fecha o solicitar devolución?">
+                        <p>No. Una vez confirmada la reserva, no se permiten cambios de fecha ni devoluciones en caso de no asistencia.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Con cuánta anticipación puedo reservar?">
+                        <p>Las reservas pueden realizarse con hasta un mes de anticipación.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Cómo valido mi reserva?">
+                        <p>Debes presentar el código QR enviado a tu correo electrónico al momento de ingresar al parque.</p>
+                    </p:tab>
+
+                    <p:tab title="No recibí el correo con el QR, ¿qué hago?">
+                        <p>
+                            Verifica que el correo ingresado sea correcto.
+                            Si el problema persiste, comunícate a:
+                            <b>parquesmetropolitanos@epmmop.gob.ec</b>
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo obtener un comprobante de pago?">
+                        <p>
+                            Sí. La aplicación genera automáticamente un comprobante electrónico (sin validez tributaria) que puedes consultar en el historial de pagos.
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo obtener una factura electrónica?">
+                        <p>
+                            Sí. Puedes descargarla desde el siguiente enlace:
+                            <br/>
+                            <a href="https://aplicacionesweb.epmmop.gob.ec:8445/FinanzasFacturacionElectronica/faces/paginas/moduloFacturaElectronica/consultas/consultarFacturasElectronicas.xhtml"
+                               target="_blank">
+                                Consultar factura electrónica
+                            </a>
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿Aplica tarifa preferencial en el pago?">
+                        <p>No. Las reservas de parrillas no aplican para tarifas preferenciales.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Qué es Placetopay?">
+                        <p>
+                            Es la plataforma de pagos electrónicos utilizada para procesar las transacciones en línea de forma segura.
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿Es seguro ingresar mis datos bancarios?">
+                        <p>
+                            Sí. Placetopay cumple con estándares internacionales de seguridad (PCI DSS) y utiliza cifrado SSL para proteger la información.
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo pagar en cualquier momento?">
+                        <p>Sí. El sistema está disponible las 24 horas del día, los 7 días de la semana.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Puedo cambiar la forma de pago?">
+                        <p>
+                            Solo antes de finalizar la transacción. Una vez completado el pago, no es posible modificarlo.
+                        </p>
+                    </p:tab>
+
+                    <p:tab title="¿El pago electrónico tiene costo adicional?">
+                        <p>No. No se generan cargos adicionales por el uso de la plataforma de pago.</p>
+                    </p:tab>
+
+                    <p:tab title="¿Qué hago si mi transacción no se completó?">
+                        <p>
+                            Verifica tu correo electrónico y que tu tarjeta tenga saldo disponible.
+                            Si el problema persiste, contacta soporte de Placetopay o acércate a un punto de atención.
+                        </p>
+                    </p:tab>
+
+                </p:accordionPanel>
+
+            </div>
+
+        </h:form>
+
+
+        <script type="text/javascript" src="#{request.contextPath}/resources/epmmop-layout/js/alert.js"></script>
+    </ui:define>
+</ui:composition>

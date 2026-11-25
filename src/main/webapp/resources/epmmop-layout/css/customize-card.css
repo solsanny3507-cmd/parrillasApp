@@ -1,0 +1,136 @@
+/*.card-custom {
+    background: transparent;
+    padding: 0px !important;
+    box-sizing: border-box;
+    box-shadow: 0 10px 40px rgba(41, 50, 65, 0.06);
+    -moz-border-radius: 24px;
+    -webkit-border-radius: 24px;
+    border-radius: 24px;
+    margin-bottom: 2rem;
+}
+.card:last-child {
+    margin-bottom: 0;
+    padding: 0px;
+    background: transparent;
+}*/
+
+.container-validacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    background: #f4f6f9;
+}
+
+.card-validacion {
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    overflow: hidden;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* LOGO */
+.logo {
+    text-align: center;
+    padding: 15px;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    padding: 20px;
+    color: #fff;
+}
+
+.header h2 {
+    margin: 10px 0 5px;
+    font-size: 18px;
+}
+
+.header span {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+.icono {
+    font-size: 40px;
+    animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* COLORES POR ESTADO */
+.header.activa { background: #2ecc71; }
+.header.vencida { background: #f39c12; }
+.header.invalida { background: #e74c3c; }
+
+/* BODY */
+.body {
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.label {
+    font-size: 11px;
+    color: #888;
+    display: block;
+}
+
+.value {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* BADGE */
+.badge {
+    margin-top: 20px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.badge.activa {
+    background: #eafaf1;
+    color: #27ae60;
+}
+
+.badge.vencida {
+    background: #fef5e7;
+    color: #d68910;
+}
+
+.badge.invalida {
+    background: #fdecea;
+    color: #c0392b;
+}
+
+/* ERROR */
+.center {
+    text-align: center;
+}
+
+.error-text {
+    color: #c0392b;
+    font-size: 14px;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    padding: 12px;
+    font-size: 11px;
+    color: #999;
+}

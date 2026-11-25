@@ -1,0 +1,89 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/WEB-INF/template-validate.xhtml">
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data">
+            <div class="container-validacion">
+                <div class="card-validacion">
+
+                    <!-- LOGO -->
+                    <div class="logo">
+                        <p:graphicImage
+                                name="images/#{ guestPreferences.lightLogo ? 'logo-quito-dark.svg' : 'logo-quito.svg'}"
+                                library="epmmop-layout"/>
+                    </div>
+
+                    <!-- HEADER -->
+                    <div class="header #{validateController.estadoClase}">
+                        <div class="icono">#{validateController.estadoIcono}</div>
+                        <h2>#{validateController.estadoTexto}</h2>
+                        <span>Sistema Integrado de Atención Ciudadana</span>
+                    </div>
+
+                    <!-- CUERPO -->
+                    <h:panelGroup rendered="#{validateController.reserva ne null}">
+                        <div class="body">
+
+                            <div class="grid">
+                                <div>
+                                    <span class="label">Titular</span>
+                                    <span class="value">#{validateController.reserva.ciudadano.perNombre}</span>
+                                </div>
+
+                                <div>
+                                    <span class="label">Parque</span>
+                                    <span class="value">#{validateController.reserva.parrilla.parque.parNombre}</span>
+                                </div>
+
+                                <div>
+                                    <span class="label">Parrilla</span>
+                                    <span class="value">#{validateController.reserva.parrilla.asaNombre}</span>
+                                </div>
+
+                                <div>
+                                    <span class="label">Fecha</span>
+                                    <span class="value">
+                            <h:outputText value="#{validateController.reserva.repFechaReserva}">
+                                <f:convertDateTime pattern="dd/MM/yyyy" type="localDate"/>
+                            </h:outputText>
+                        </span>
+                                </div>
+
+                                <div>
+                                    <span class="label">Reserva</span>
+                                    <span class="value">##{validateController.reserva.repSecuencial}</span>
+                                </div>
+                            </div>
+
+                            <div class="badge #{validateController.estadoClase}">
+                                #{validateController.estadoTexto}
+                            </div>
+
+                        </div>
+                    </h:panelGroup>
+
+                    <!-- ERROR -->
+                    <h:panelGroup rendered="#{validateController.reserva eq null}">
+                        <div class="body center">
+                            <p class="error-text">#{validateController.estadoTexto}</p>
+                        </div>
+                    </h:panelGroup>
+
+                    <!-- FOOTER -->
+                    <div class="footer">
+                        EPMMOP — Validación automática de reservas
+                    </div>
+
+                </div>
+            </div>
+        </h:form>
+
+
+        <script type="text/javascript" src="#{request.contextPath}/resources/epmmop-layout/js/alert.js"></script>
+    </ui:define>
+</ui:composition>
